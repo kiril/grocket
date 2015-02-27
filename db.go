@@ -2,6 +2,7 @@ package main
 
 import (
     "time"
+    "sort"
     "container/list"
 )
 
@@ -17,31 +18,77 @@ type TimeBucket struct {
 }
 
 type IndexedEvent struct {
-    Event *Event
-    Time  time.Time
+    Event  *Event
+    Bucket *TimeBucket
 }
 
-var eventsById map[string]*Event
+var eventsById map[string]*IndexedEvent
 var timeBuckets list.List
 
-func RemoveFromTimeBucket(event *Event) {
+func (bucket TimeBucket) RemoveEvent(event *Event) {
 }
 
-func AddToTimeBucket(event *Event) {
+func (bucket TimeBucket) AddEvent(event *Event) {
+}
+
+func (indexed IndexedEvent) EnsureInBucket() {
+    i := sort.Search(len(indexed.Bucket.EventIds),
+        func(i int) bool {return indexed.Bucket.EventIds[i] >= indexed.Event.Id})
+
+    if i >= len(indexed.Bucket.EventIds) { // all event ids are < me
+        indexed.Bucket.EventIds = append(indexed.Bucket.EventIds, indexed.Event.Id)
+
+    } else if i == 0 && indexed.Bucket.EventIds[i] != indexed.Event.Id { // greater than me
+        indexed.Bucket.EventIds = append([]string{indexed.Event.Id,}, indexed.Bucket.EventIds...)
+
+    } else if indexed.Bucket.EventIds[i] != indexed.Event.Id {
+        eventIds := make([]string, len(indexed.Bucket.EventIds)+1)
+        for j := 0; j < i; j++ {
+            eventIds[j] = indexed.Bucket.EventIds[j]
+        }
+
+        eventIds[i] = indexed.Event.Id
+
+        for k := i+1; k < len(eventIds); k++ {
+            eventIds[k] = indexed.Bucket.EventIds[k-1]
+        }
+
+        indexed.Bucket.EventIds = eventIds
+    }
+}
+
+func RemoveTimeBucket(bucket *TimeBucket) {
+}
+
+func RemoveFromTimeBucket(indexed *IndexedEvent) {
+    if len(indexed.Bucket.EventIds) == 1 {
+        RemoveTimeBucket(indexed.Bucket)
+    }
 }
 
 func StoreEvent(event *Event) {
-    indexedEvent := eventsById[event.Id]
-    if indexedEvent != nil {
-        if ! indexedEvent.Due.Equal(event.Due) {
-            RemoveFromTimeBucket(indexedEvent)
-            AddToTimeBucket(event)
+    indexed := eventsById[event.Id]
+    if indexed != nil {
+        if ! indexed.Event.Due.Equal(event.Due) {
+            indexed.Bucket.RemoveEvent(indexed.Event)
+            indexed = &IndexedEvent{
+                Event: event,
+                Bucket: FindOrCreateTimeBucket(event.Due),
+            }
+
+        } else {
+            indexed.Event = event
         }
+
     } else {
-        AddToTimeBucket(event)
+        indexed = &IndexedEvent{
+            Event: event,
+            Bucket: FindOrCreateTimeBucket(event.Due),
+        }
     }
 
-    eventsById[event.Id] = event
+    indexed.EnsureInBucket()
+    eventsById[event.Id] = indexed
 }
 
 func RetrieveEventById(id string) *Event {
@@ -58,7 +105,4 @@ func NextTimeBucket() *TimeBucket {
         return element.Value.(*TimeBucket)
     }
     return nil
-}
-
-func RemoveTimeBucket(bucket *TimeBucket) {
 }
