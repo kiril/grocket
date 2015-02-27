@@ -23,7 +23,7 @@ func ViewEvent(writer http.ResponseWriter, request *http.Request) {
 
     event := Event{
         Id:          eventId,
-        Time:        time.Now(),
+        Due:         time.Now(),
         Payload:     "somedata",
         Expiry:      time.Now().Add(time.Minute * 1),
         EndPoint:    "http://dev/null",

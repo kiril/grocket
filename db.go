@@ -16,12 +16,31 @@ type TimeBucket struct {
     EventIds []string
 }
 
+type IndexedEvent struct {
+    Event *Event
+    Time  time.Time
+}
+
 var eventsById map[string]*Event
 var timeBuckets list.List
-// timeBuckets.PushBack(v)
-// l.Front()
+
+func RemoveFromTimeBucket(event *Event) {
+}
+
+func AddToTimeBucket(event *Event) {
+}
 
 func StoreEvent(event *Event) {
+    indexedEvent := eventsById[event.Id]
+    if indexedEvent != nil {
+        if ! indexedEvent.Due.Equal(event.Due) {
+            RemoveFromTimeBucket(indexedEvent)
+            AddToTimeBucket(event)
+        }
+    } else {
+        AddToTimeBucket(event)
+    }
+
     eventsById[event.Id] = event
 }
 

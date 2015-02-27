@@ -7,7 +7,7 @@ import (
 
 type Event struct {
 	Id          string    `json:"id"`
-	Time        time.Time `json:"due"`
+	Due         time.Time `json:"due"`
 	Payload     string    `json:"payload"`
 	Expiry      time.Time `json:"expiry"`
 	EndPoint    string    `json:"endpoint"`
