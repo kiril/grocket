@@ -4,8 +4,10 @@ import "time"
 
 func Tick() {
     time.Sleep(ProbabilisticSleepDuration())
-    Distribute(NextDueEvent())
+    event := NextDueEvent()
+    Distribute(&event)
 }
 
-func Distribute(event Event) {
+func Distribute(event *Event) {
+
 }
