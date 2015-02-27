@@ -34,3 +34,6 @@ func EventVerb(writer http.ResponseWriter, request *http.Request) {
 
 func EventMaxAttempts(writer http.ResponseWriter, request *http.Request) {
 }
+
+func EventList(writer http.ResponseWriter, request *http.Request) {
+}
