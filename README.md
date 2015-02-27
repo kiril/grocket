@@ -6,6 +6,7 @@ Grocket is based on the abstraction of an Event.
 
 And Event is characterized by:
 
+* an id
 * an endpoint that the event is pushed to (a REST API call)
 * a time at which the event should fire ('due')
 * a payload, which is a string (could be JSON, could be base64-encoded binary, etc.)
@@ -14,7 +15,8 @@ And Event is characterized by:
 * a max-attempts number (optional, defaults to infinite)
 
 ````
-PUT /events {due: <long/timestamp>,
+PUT /events {id: <string>,
+             due: <long/timestamp>,
              payload: <string>,
              expiry: <long/timestamp>,
              endpoint: "https://service.domain.tld/collection",
