@@ -13,9 +13,11 @@ And Event is characterized by:
 * a timeout after which the event should be discarded (optionally, defaults to infinite)
 * a max-attempts number (optional, defaults to infinite)
 
-    PUT /events {time: <long/timestamp>,
-                 payload: <string>,
-                 expiry: <long/timestamp>,
-                 endpoint: "https://service.domain.tld/collection",
-                 max-attempts: 1,
-                 verb: <PUT|POST|DELETE|GET>}
+````
+PUT /events {time: <long/timestamp>,
+             payload: <string>,
+             expiry: <long/timestamp>,
+             endpoint: "https://service.domain.tld/collection",
+             max-attempts: 1,
+             verb: <PUT|POST|DELETE|GET>}
+````
