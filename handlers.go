@@ -22,13 +22,13 @@ func ViewEvent(writer http.ResponseWriter, request *http.Request) {
     eventId := vars["eventId"]
 
     event := Event{
-        Id: eventId,
-        Time: time.Now(),
-        Payload: "somedata",
-        Expiry: time.Now().Add(time.Minute * 1),
-        EndPoint: "http://dev/null",
+        Id:          eventId,
+        Time:        time.Now(),
+        Payload:     "somedata",
+        Expiry:      time.Now().Add(time.Minute * 1),
+        EndPoint:    "http://dev/null",
         MaxAttempts: 0,
-        Verb: "PUT",
+        Verb:        "PUT",
     }
 
     writer.Header().Set("Content-Type", "application/json;charset=UTF-8")
