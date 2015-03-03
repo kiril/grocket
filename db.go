@@ -2,7 +2,6 @@ package grocket
 
 import (
     "time"
-    "sort"
     "log"
 
     "github.com/kiril/btree"
@@ -84,56 +83,6 @@ func RemoveTimeBucket(bucket *TimeBucket) error {
         log.Fatal(timeError, "couldn't marshal time")
     }
     return bucketByTimeIndex.Delete(key)
-}
-
-
-func (bucket TimeBucket) RemoveEvent(event *Event) {
-    i := sort.Search(len(bucket.EventIds),
-        func(i int) bool {return string(bucket.EventIds[i]) >= event.Id})
-
-    if i < len(bucket.EventIds) && string(bucket.EventIds[i]) == event.Id {
-        if ( len(bucket.EventIds) == 1 ) {
-            bucket.EventIds = [][]byte{}
-
-        } else {
-            eventIds := make([][]byte, len(bucket.EventIds)-1)
-            for j := 0; j < i; j++ {
-                eventIds[j] = bucket.EventIds[j]
-            }
-
-            for k := i; k < len(eventIds); k++ {
-                eventIds[k] = bucket.EventIds[k+1]
-            }
-
-            bucket.EventIds = eventIds
-        }
-    }
-}
-
-func (bucket TimeBucket) AddEvent(event *Event) {
-    i := sort.Search(len(bucket.EventIds),
-        func(i int) bool {return string(bucket.EventIds[i]) >= event.Id})
-
-    if i >= len(bucket.EventIds) { // all event ids are < me
-        bucket.EventIds = append(bucket.EventIds, []byte(event.Id))
-
-    } else if i == 0 && string(bucket.EventIds[i]) != event.Id { // greater than me
-        bucket.EventIds = append([][]byte{[]byte(event.Id),}, bucket.EventIds...)
-
-    } else if string(bucket.EventIds[i]) != event.Id {
-        eventIds := make([][]byte, len(bucket.EventIds)+1)
-        for j := 0; j < i; j++ {
-            eventIds[j] = bucket.EventIds[j]
-        }
-
-        eventIds[i] = []byte(event.Id)
-
-        for k := i+1; k < len(eventIds); k++ {
-            eventIds[k] = bucket.EventIds[k-1]
-        }
-
-        bucket.EventIds = eventIds
-    }
 }
 
 func (indexed IndexedEvent) AddToBucket() {

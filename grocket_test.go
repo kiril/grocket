@@ -56,6 +56,22 @@ func TestBucketRoundTrips(tests *testing.T) {
     }
 }
 
+func TestBucketModifiers(tests *testing.T) {
+    event := &grocket.Event{
+        Id: "123",
+        Due: time.Now(),
+        Payload: "Holy Shit",
+        Expiry: time.Now().Add(time.Second * 60),
+        EndPoint: "http://gc.com/fooooo",
+    }
+
+    bucket := &grocket.TimeBucket{Time: time.Now(), EventIds: [][]byte{}}
+    bucket.AddEvent(event)
+    if ! bucket.ContainsEvent(event) {
+        tests.Fatal("Event not found")
+    }
+}
+
 func TestStoreEvent(tests *testing.T) {
     event := &grocket.Event{
         Id: "123",
