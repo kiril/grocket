@@ -159,3 +159,7 @@ func (bucket *TimeBucket) AddEvent(event *Event) {
         bucket.EventIds = eventIds
     }
 }
+
+func (bucket *TimeBucket) CountEvents() int {
+    return len(bucket.EventIds)
+}

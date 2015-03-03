@@ -66,9 +66,36 @@ func TestBucketModifiers(tests *testing.T) {
     }
 
     bucket := &grocket.TimeBucket{Time: time.Now(), EventIds: [][]byte{}}
+    if bucket.CountEvents() != 0 {
+        tests.Fatal("Didn't get it")
+    }
+
     bucket.AddEvent(event)
     if ! bucket.ContainsEvent(event) {
         tests.Fatal("Event not found")
+    }
+
+    if bucket.CountEvents() != 1 {
+        tests.Fatal("Didn't get it")
+    }
+
+    bucket.RemoveEvent(event)
+    if bucket.ContainsEvent(event) {
+        tests.Fatal("Holy shit why is it still there")
+    }
+
+    event2 := &grocket.Event{
+        Id: "345",
+        Due: time.Now(),
+        Payload: "Holy Shit",
+        Expiry: time.Now().Add(time.Second * 60),
+        EndPoint: "http://gc.com/fooooo",
+    }
+
+    bucket.AddEvent(event)
+    bucket.AddEvent(event2)
+    if bucket.CountEvents() != 2 {
+        tests.Fatal("Didn't get it")
     }
 }
 
