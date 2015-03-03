@@ -19,7 +19,7 @@ type IndexedEvent struct {
     Bucket *TimeBucket
 }
 
-var eventsById map[string]*IndexedEvent
+var eventsById = make(map[string]*IndexedEvent)
 var bucketByTimeIndex = btree.NewBtree()
 
 func FindBucketByTime(due time.Time) *TimeBucket {
@@ -30,6 +30,9 @@ func FindBucketByTime(due time.Time) *TimeBucket {
     binary, searchError := bucketByTimeIndex.Search(key)
     if error != nil {
         log.Fatal(searchError)
+    }
+    if binary == nil {
+        return nil
     }
     bucket := &TimeBucket{}
     bucket.UnmarshalBinary(binary)

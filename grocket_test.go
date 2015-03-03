@@ -53,3 +53,15 @@ func TestBucketRoundTrips(tests *testing.T) {
         tests.Fatal("Delete didn't work")
     }
 }
+
+func TestStoreEvent(tests *testing.T) {
+    event := &grocket.Event{
+        Id: "123",
+        Due: time.Now(),
+        Payload: "Holy Shit",
+        Expiry: time.Now().Add(time.Second * 60),
+        EndPoint: "http://gc.com/fooooo",
+    }
+
+    grocket.StoreEvent(event)
+}
