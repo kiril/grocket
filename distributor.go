@@ -7,7 +7,7 @@ func ProcessBacklog() {
     // which I don't even know how to do yet.
     for bucket := NextTimeBucket(); bucket != nil && time.Now().After(bucket.Time); {
         for i := 0; i < len(bucket.EventIds); i++ {
-            event := RetrieveEventById(bucket.EventIds[i])
+            event := RetrieveEventById(string(bucket.EventIds[i]))
             Distribute(event)
         }
         RemoveTimeBucket(bucket)

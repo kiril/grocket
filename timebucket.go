@@ -9,11 +9,15 @@ import (
 
 type TimeBucket struct {
     Time     time.Time
-    EventIds []string
+    EventIds [][]byte
 }
 
 func (bucket *TimeBucket) String() string {
-    return fmt.Sprintf("{Event:%s, EventIds:%s}", bucket.Time, bucket.EventIds)
+    stringIds := make([]string, len(bucket.EventIds))
+    for i := 0; i < len(stringIds); i++ {
+        stringIds[i] = string(bucket.EventIds[i])
+    }
+    return fmt.Sprintf("{Event:%s, EventIds:%s}", bucket.Time, stringIds)
 }
 
 func (bucket TimeBucket) MarshalBinary() ([]byte, error) {
@@ -24,13 +28,10 @@ func (bucket TimeBucket) MarshalBinary() ([]byte, error) {
 
     idCount := len(bucket.EventIds)
 
-    idByteStrings := make([][]byte, idCount)
-
     totalByteLength := 1 + len(timeBytes) + 1 + idCount
 
     for i := 0; i < idCount; i++ {
-        idByteStrings[i] = []byte(bucket.EventIds[i])
-        totalByteLength += len(idByteStrings[i])
+        totalByteLength += len(bucket.EventIds[i])
     }
 
     bytes := make([]byte, totalByteLength)
@@ -48,10 +49,10 @@ func (bucket TimeBucket) MarshalBinary() ([]byte, error) {
     b++
 
     for i := 0; i < idCount; i++ {
-        bytes[b] = byte(len(idByteStrings[i]))
+        bytes[b] = byte(len(bucket.EventIds[i]))
         b++
-        for j := 0; j < len(idByteStrings[i]); j++ {
-            bytes[b] = idByteStrings[i][j]
+        for j := 0; j < len(bucket.EventIds[i]); j++ {
+            bytes[b] = bucket.EventIds[i][j]
             b++
         }
     }
@@ -82,7 +83,7 @@ func (bucket *TimeBucket) UnmarshalBinary(bytes []byte) error {
     idCount := int(bytes[b])
     b++
 
-    bucket.EventIds = make([]string, idCount)
+    bucket.EventIds = make([][]byte, idCount)
     for i := 0; i < idCount; i++ {
         idLength := int(bytes[b])
         b++
@@ -90,7 +91,7 @@ func (bucket *TimeBucket) UnmarshalBinary(bytes []byte) error {
         for j := 0; j < idLength; j++ {
             idBytes[j] = bytes[b+j]
         }
-        bucket.EventIds[i] = string(idBytes)
+        bucket.EventIds[i] = idBytes
         b += idLength
     }
 

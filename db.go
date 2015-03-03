@@ -40,7 +40,7 @@ func FindBucketByTime(due time.Time) *TimeBucket {
 func FindOrCreateTimeBucket(due time.Time) *TimeBucket {
     bucket := FindBucketByTime(due)
     if bucket == nil {
-        bucket = &TimeBucket{Time: due, EventIds: []string{}}
+        bucket = &TimeBucket{Time: due, EventIds: [][]byte{}}
         InsertTimeBucket(bucket)
     }
     return bucket
@@ -86,14 +86,14 @@ func RemoveTimeBucket(bucket *TimeBucket) error {
 
 func (bucket TimeBucket) RemoveEvent(event *Event) {
     i := sort.Search(len(bucket.EventIds),
-        func(i int) bool {return bucket.EventIds[i] >= event.Id})
+        func(i int) bool {return string(bucket.EventIds[i]) >= event.Id})
 
-    if i < len(bucket.EventIds) && bucket.EventIds[i] == event.Id {
+    if i < len(bucket.EventIds) && string(bucket.EventIds[i]) == event.Id {
         if ( len(bucket.EventIds) == 1 ) {
-            bucket.EventIds = []string{}
+            bucket.EventIds = [][]byte{}
 
         } else {
-            eventIds := make([]string, len(bucket.EventIds)-1)
+            eventIds := make([][]byte, len(bucket.EventIds)-1)
             for j := 0; j < i; j++ {
                 eventIds[j] = bucket.EventIds[j]
             }
@@ -109,21 +109,21 @@ func (bucket TimeBucket) RemoveEvent(event *Event) {
 
 func (bucket TimeBucket) AddEvent(event *Event) {
     i := sort.Search(len(bucket.EventIds),
-        func(i int) bool {return bucket.EventIds[i] >= event.Id})
+        func(i int) bool {return string(bucket.EventIds[i]) >= event.Id})
 
     if i >= len(bucket.EventIds) { // all event ids are < me
-        bucket.EventIds = append(bucket.EventIds, event.Id)
+        bucket.EventIds = append(bucket.EventIds, []byte(event.Id))
 
-    } else if i == 0 && bucket.EventIds[i] != event.Id { // greater than me
-        bucket.EventIds = append([]string{event.Id,}, bucket.EventIds...)
+    } else if i == 0 && string(bucket.EventIds[i]) != event.Id { // greater than me
+        bucket.EventIds = append([][]byte{[]byte(event.Id),}, bucket.EventIds...)
 
-    } else if bucket.EventIds[i] != event.Id {
-        eventIds := make([]string, len(bucket.EventIds)+1)
+    } else if string(bucket.EventIds[i]) != event.Id {
+        eventIds := make([][]byte, len(bucket.EventIds)+1)
         for j := 0; j < i; j++ {
             eventIds[j] = bucket.EventIds[j]
         }
 
-        eventIds[i] = event.Id
+        eventIds[i] = []byte(event.Id)
 
         for k := i+1; k < len(eventIds); k++ {
             eventIds[k] = bucket.EventIds[k-1]
