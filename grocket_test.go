@@ -24,6 +24,8 @@ func TestTimeBucketMarshaling(tests *testing.T) {
 }
 
 func TestBucketRoundTrips(tests *testing.T) {
+    grocket.FindBucketByTime(time.Now()) // tests that it's OK to be empty
+
     bucket := &grocket.TimeBucket{Time: time.Now(), EventIds: [][]byte{[]byte("111")}}
     grocket.InsertTimeBucket(bucket)
 
