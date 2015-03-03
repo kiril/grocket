@@ -7,12 +7,6 @@ import (
     "github.com/kiril/btree"
 )
 
-/*
- * So, let's figure out how we're going to store this shit.
- * I want an index from {id -> event}
- * and I want an ordered index from {due -> event}
- */
-
 type IndexedEvent struct {
     Event  *Event
     Bucket *TimeBucket
