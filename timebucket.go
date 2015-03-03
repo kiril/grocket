@@ -112,10 +112,11 @@ func (bucket *TimeBucket) ContainsEvent(event *Event) bool {
 }
 
 func (bucket *TimeBucket) RemoveEvent(event *Event) {
-    i := sort.Search(len(bucket.EventIds),
-        func(i int) bool {return string(bucket.EventIds[i]) >= event.Id})
+    idBytes := []byte(event.Id)
 
-    if i < len(bucket.EventIds) && string(bucket.EventIds[i]) == event.Id {
+    i := sort.Search(len(bucket.EventIds), func(i int) bool {return reflect.DeepEqual(bucket.EventIds[i], idBytes)})
+
+    if i < len(bucket.EventIds) && reflect.DeepEqual(bucket.EventIds[i], idBytes) {
         if ( len(bucket.EventIds) == 1 ) {
             bucket.EventIds = [][]byte{}
 
