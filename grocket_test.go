@@ -27,7 +27,7 @@ func TestBucketRoundTrips(tests *testing.T) {
     grocket.FindBucketByTime(time.Now()) // tests that it's OK to be empty
 
     bucket := &grocket.TimeBucket{Time: time.Now(), EventIds: [][]byte{[]byte("111")}}
-    grocket.InsertTimeBucket(bucket)
+    grocket.SaveTimeBucket(bucket)
 
     if time.Now() == bucket.Time {
         tests.Fatal("Well that sucks, we're too fast to function")
@@ -109,4 +109,17 @@ func TestStoreEvent(tests *testing.T) {
     }
 
     grocket.StoreEvent(event)
+    event = grocket.RetrieveEventById(event.Id)
+    if event == nil {
+        tests.Fatal("Shit, didn't make it into the map")
+    }
+
+    bucket := grocket.FindBucketByTime(event.Due)
+    if bucket == nil {
+        tests.Fatal("The world is insane")
+    }
+
+    if ! bucket.ContainsEvent(event) {
+        tests.Fatal("Wait, where is my event then?", bucket)
+    }
 }

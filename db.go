@@ -43,7 +43,7 @@ func FindOrCreateTimeBucket(due time.Time) *TimeBucket {
     bucket := FindBucketByTime(due)
     if bucket == nil {
         bucket = &TimeBucket{Time: due, EventIds: [][]byte{}}
-        InsertTimeBucket(bucket)
+        SaveTimeBucket(bucket)
     }
     return bucket
 }
@@ -63,7 +63,7 @@ func NextTimeBucket() *TimeBucket {
     return nil
 }
 
-func InsertTimeBucket(bucket *TimeBucket) error {
+func SaveTimeBucket(bucket *TimeBucket) error {
     key, timeError := bucket.Time.MarshalBinary()
     if timeError != nil {
         log.Fatal(timeError)
@@ -74,7 +74,12 @@ func InsertTimeBucket(bucket *TimeBucket) error {
         log.Fatal(valueError)
     }
 
-    return bucketByTimeIndex.Insert(key, value)
+    existing := FindBucketByTime(bucket.Time)
+    if existing != nil {
+        return bucketByTimeIndex.Update(key, value)
+    } else {
+        return bucketByTimeIndex.Insert(key, value)
+    }
 }
 
 func RemoveTimeBucket(bucket *TimeBucket) error {
@@ -111,6 +116,7 @@ func StoreEvent(event *Event) {
     }
 
     indexed.AddToBucket()
+    SaveTimeBucket(indexed.Bucket)
     eventsById[event.Id] = indexed
 }
 

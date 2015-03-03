@@ -19,7 +19,7 @@ func (bucket *TimeBucket) String() string {
     for i := 0; i < len(stringIds); i++ {
         stringIds[i] = string(bucket.EventIds[i])
     }
-    return fmt.Sprintf("{Event:%s, EventIds:%s}", bucket.Time, stringIds)
+    return fmt.Sprintf("{Time:%s, EventIds:%s}", bucket.Time, stringIds)
 }
 
 func (bucket TimeBucket) MarshalBinary() ([]byte, error) {
