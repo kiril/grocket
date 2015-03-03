@@ -24,4 +24,8 @@ func TestTimeBucketMarshaling(tests *testing.T) {
     if bucket.EventIds[0] != bucket2.EventIds[0] {
         tests.Error("Shit")
     }
+
+    if bucket.Time != bucket2.Time {
+        tests.Error("Times don't match")
+    }
 }
