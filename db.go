@@ -4,6 +4,7 @@ import (
     "time"
     "sort"
     "log"
+    "fmt"
 
     "github.com/kiril/btree"
 )
@@ -22,6 +23,10 @@ type TimeBucket struct {
 type IndexedEvent struct {
     Event  *Event
     Bucket *TimeBucket
+}
+
+func (bucket *TimeBucket) String() string {
+    return fmt.Sprintf("{Event:%s, EventIds:%s}", bucket.Time, bucket.EventIds)
 }
 
 func (bucket TimeBucket) MarshalBinary() ([]byte, error) {

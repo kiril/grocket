@@ -4,6 +4,7 @@ import (
     "../grocket"
     "testing"
     "time"
+    "reflect"
 )
 
 func TestTimeBucketMarshaling(tests *testing.T) {
@@ -27,5 +28,26 @@ func TestTimeBucketMarshaling(tests *testing.T) {
 
     if bucket.Time != bucket2.Time {
         tests.Error("Times don't match")
+    }
+}
+
+func TestBucketRoundTrips(tests *testing.T) {
+    bucket := &grocket.TimeBucket{Time: time.Now(), EventIds: []string{"111"}}
+    grocket.InsertTimeBucket(bucket)
+
+    if time.Now() == bucket.Time {
+        tests.Fatal("Well that sucks, we're too fast to function")
+    }
+
+    bucket2 := grocket.NextTimeBucket()
+
+    if ! reflect.DeepEqual(bucket, bucket2) {
+        tests.Fatalf("NOT EQUAL %s != %s", bucket, bucket2)
+    }
+
+    bucket3 := grocket.FindBucketByTime(bucket.Time)
+
+    if ! reflect.DeepEqual(bucket, bucket3) {
+        tests.Fatalf("NOT EQUAL %s != %s", bucket, bucket3)
     }
 }
