@@ -25,11 +25,43 @@ type IndexedEvent struct {
 }
 
 func (bucket TimeBucket) MarshalBinary() ([]byte, error) {
-    idByteStrings := make([][]byte, len(bucket.EventIds))
-    for i := 0; i < len(idByteStrings); i++ {
-        idByteStrings[i] = []byte(bucket.EventIds[i])
+    timeBytes, error := bucket.Time.MarshalBinary()
+    if error != nil {
+        log.Fatal(error)
     }
-    return nil, nil
+
+    idCount := len(bucket.EventIds)
+
+    idByteStrings := make([][]byte, idCount)
+
+    totalByteLength := 1 + len(timeBytes) + idCount
+
+    for i := 0; i < idCount; i++ {
+        idByteStrings[i] = []byte(bucket.EventIds[i])
+        totalByteLength += len(idByteStrings[i])
+    }
+
+    bytes := make([]byte, totalByteLength)
+
+    b := 0
+    bytes[b] = byte(len(timeBytes))
+    b++
+
+    for i := 0; i < len(timeBytes); i++ {
+        bytes[b] = timeBytes[i]
+        b++
+    }
+
+    for i := 0; i < idCount; i++ {
+        bytes[b] = byte(len(idByteStrings[i]))
+        b++
+        for j := 0; j < len(idByteStrings[i]); j++ {
+            bytes[b] = idByteStrings[i][j]
+            b++
+        }
+    }
+
+    return bytes, nil
 }
 
 func (bucket *TimeBucket) UnmarshalBinary(data []byte) error {
