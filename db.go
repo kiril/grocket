@@ -34,7 +34,7 @@ func (bucket TimeBucket) MarshalBinary() ([]byte, error) {
 
     idByteStrings := make([][]byte, idCount)
 
-    totalByteLength := 1 + len(timeBytes) + idCount
+    totalByteLength := 1 + len(timeBytes) + 1 + idCount
 
     for i := 0; i < idCount; i++ {
         idByteStrings[i] = []byte(bucket.EventIds[i])
@@ -52,6 +52,9 @@ func (bucket TimeBucket) MarshalBinary() ([]byte, error) {
         b++
     }
 
+    bytes[b] = byte(idCount)
+    b++
+
     for i := 0; i < idCount; i++ {
         bytes[b] = byte(len(idByteStrings[i]))
         b++
@@ -64,7 +67,41 @@ func (bucket TimeBucket) MarshalBinary() ([]byte, error) {
     return bytes, nil
 }
 
-func (bucket *TimeBucket) UnmarshalBinary(data []byte) error {
+func (bucket *TimeBucket) UnmarshalBinary(bytes []byte) error {
+    // 0 : length of timeBytes
+    // 1-<length of timeBytes> timeBytes
+    // then:
+    // L : one byte length of a string id
+    // L+1... a string
+    lengthOfTimeBytes := int(bytes[0])
+    timeBytes := make([]byte, lengthOfTimeBytes)
+    for i := 0; i < lengthOfTimeBytes; i++ {
+        timeBytes[i] = bytes[i+1]
+    }
+
+    due := time.Now()
+    error := due.UnmarshalBinary(timeBytes)
+    if error != nil {
+        log.Fatal(error)
+    }
+    bucket.Time = due
+
+    b := lengthOfTimeBytes + 1
+    idCount := int(bytes[b])
+    b++
+
+    bucket.EventIds = make([]string, idCount)
+    for i := 0; i < idCount; i++ {
+        idLength := int(bytes[b])
+        b++
+        idBytes := make([]byte, idLength)
+        for j := 0; j < idLength; j++ {
+            idBytes[j] = bytes[b+j]
+        }
+        bucket.EventIds[i] = string(idBytes)
+        b += idLength
+    }
+
     return nil
 }
 
