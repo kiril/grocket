@@ -1,9 +1,11 @@
-package main
+package grocket
 
 import (
     "time"
     "sort"
-    "container/list"
+    "log"
+
+    "github.com/kiril/btree"
 )
 
 /*
@@ -22,48 +24,132 @@ type IndexedEvent struct {
     Bucket *TimeBucket
 }
 
+func (bucket TimeBucket) MarshalBinary() ([]byte, error) {
+    //idByteStrings := make([]byte, len(bucket.EventIds))
+    return nil, nil
+}
+
+func (bucket *TimeBucket) UnmarshalBinary(data []byte) error {
+    return nil
+}
+
+
 var eventsById map[string]*IndexedEvent
-var timeBuckets list.List
+var bucketByTimeIndex = btree.NewBtree()
+
+func FindBucketByTime(due time.Time) *TimeBucket {
+    key, error := due.MarshalBinary()
+    if error != nil {
+        log.Fatal(error)
+    }
+    binary, searchError := bucketByTimeIndex.Search(key)
+    if error != nil {
+        log.Fatal(searchError)
+    }
+    bucket := &TimeBucket{}
+    bucket.UnmarshalBinary(binary)
+    return bucket
+
+}
+
+func FindOrCreateTimeBucket(due time.Time) *TimeBucket {
+    bucket := FindBucketByTime(due)
+    if bucket == nil {
+        bucket = &TimeBucket{Time: due, EventIds: []string{}}
+        InsertTimeBucket(bucket)
+    }
+    return bucket
+}
+
+func NextTimeBucket() *TimeBucket {
+    first, error := bucketByTimeIndex.Left()
+    if error != nil {
+        log.Fatal(error)
+    }
+
+    if first != nil {
+        bucket := &TimeBucket{}
+        bucket.UnmarshalBinary(first)
+        return bucket
+    }
+
+    return nil
+}
+
+func InsertTimeBucket(bucket *TimeBucket) error {
+    key, timeError := bucket.Time.MarshalBinary()
+    if timeError != nil {
+        log.Fatal(timeError)
+    }
+
+    value, valueError := bucket.MarshalBinary()
+    if valueError != nil {
+        log.Fatal(valueError)
+    }
+
+    return bucketByTimeIndex.Insert(key, value)
+}
+
+func RemoveTimeBucket(bucket *TimeBucket) error {
+    key, timeError := bucket.Time.MarshalBinary()
+    if timeError != nil {
+        log.Fatal(timeError)
+    }
+    return bucketByTimeIndex.Delete(key)
+}
+
 
 func (bucket TimeBucket) RemoveEvent(event *Event) {
+    i := sort.Search(len(bucket.EventIds),
+        func(i int) bool {return bucket.EventIds[i] >= event.Id})
+
+    if i < len(bucket.EventIds) && bucket.EventIds[i] == event.Id {
+        if ( len(bucket.EventIds) == 1 ) {
+            bucket.EventIds = []string{}
+
+        } else {
+            eventIds := make([]string, len(bucket.EventIds)-1)
+            for j := 0; j < i; j++ {
+                eventIds[j] = bucket.EventIds[j]
+            }
+
+            for k := i; k < len(eventIds); k++ {
+                eventIds[k] = bucket.EventIds[k+1]
+            }
+
+            bucket.EventIds = eventIds
+        }
+    }
 }
 
 func (bucket TimeBucket) AddEvent(event *Event) {
-}
+    i := sort.Search(len(bucket.EventIds),
+        func(i int) bool {return bucket.EventIds[i] >= event.Id})
 
-func (indexed IndexedEvent) EnsureInBucket() {
-    i := sort.Search(len(indexed.Bucket.EventIds),
-        func(i int) bool {return indexed.Bucket.EventIds[i] >= indexed.Event.Id})
+    if i >= len(bucket.EventIds) { // all event ids are < me
+        bucket.EventIds = append(bucket.EventIds, event.Id)
 
-    if i >= len(indexed.Bucket.EventIds) { // all event ids are < me
-        indexed.Bucket.EventIds = append(indexed.Bucket.EventIds, indexed.Event.Id)
+    } else if i == 0 && bucket.EventIds[i] != event.Id { // greater than me
+        bucket.EventIds = append([]string{event.Id,}, bucket.EventIds...)
 
-    } else if i == 0 && indexed.Bucket.EventIds[i] != indexed.Event.Id { // greater than me
-        indexed.Bucket.EventIds = append([]string{indexed.Event.Id,}, indexed.Bucket.EventIds...)
-
-    } else if indexed.Bucket.EventIds[i] != indexed.Event.Id {
-        eventIds := make([]string, len(indexed.Bucket.EventIds)+1)
+    } else if bucket.EventIds[i] != event.Id {
+        eventIds := make([]string, len(bucket.EventIds)+1)
         for j := 0; j < i; j++ {
-            eventIds[j] = indexed.Bucket.EventIds[j]
+            eventIds[j] = bucket.EventIds[j]
         }
 
-        eventIds[i] = indexed.Event.Id
+        eventIds[i] = event.Id
 
         for k := i+1; k < len(eventIds); k++ {
-            eventIds[k] = indexed.Bucket.EventIds[k-1]
+            eventIds[k] = bucket.EventIds[k-1]
         }
 
-        indexed.Bucket.EventIds = eventIds
+        bucket.EventIds = eventIds
     }
 }
 
-func RemoveTimeBucket(bucket *TimeBucket) {
-}
-
-func RemoveFromTimeBucket(indexed *IndexedEvent) {
-    if len(indexed.Bucket.EventIds) == 1 {
-        RemoveTimeBucket(indexed.Bucket)
-    }
+func (indexed IndexedEvent) AddToBucket() {
+    indexed.Bucket.AddEvent(indexed.Event)
 }
 
 func StoreEvent(event *Event) {
@@ -87,22 +173,14 @@ func StoreEvent(event *Event) {
         }
     }
 
-    indexed.EnsureInBucket()
+    indexed.AddToBucket()
     eventsById[event.Id] = indexed
 }
 
 func RetrieveEventById(id string) *Event {
-    return eventsById[id]
+    return eventsById[id].Event
 }
 
 func ProbabilisticSleepDuration() time.Duration {
     return time.Millisecond * 100
-}
-
-func NextTimeBucket() *TimeBucket {
-    element := timeBuckets.Front()
-    if element != nil {
-        return element.Value.(*TimeBucket)
-    }
-    return nil
 }
