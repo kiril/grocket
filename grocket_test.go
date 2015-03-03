@@ -50,4 +50,14 @@ func TestBucketRoundTrips(tests *testing.T) {
     if ! reflect.DeepEqual(bucket, bucket3) {
         tests.Fatalf("NOT EQUAL %s != %s", bucket, bucket3)
     }
+
+    error := grocket.RemoveTimeBucket(bucket)
+    if error != nil {
+        tests.Fatal(error, "couldn't remove bucket")
+    }
+
+    bucket4 := grocket.NextTimeBucket()
+    if bucket4 != nil {
+        tests.Fatal("Delete didn't work")
+    }
 }

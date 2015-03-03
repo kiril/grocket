@@ -49,7 +49,7 @@ func FindOrCreateTimeBucket(due time.Time) *TimeBucket {
 func NextTimeBucket() *TimeBucket {
     first, error := bucketByTimeIndex.Left()
     if error != nil {
-        log.Fatal(error)
+        return nil
     }
 
     if first != nil {
@@ -78,7 +78,7 @@ func InsertTimeBucket(bucket *TimeBucket) error {
 func RemoveTimeBucket(bucket *TimeBucket) error {
     key, timeError := bucket.Time.MarshalBinary()
     if timeError != nil {
-        log.Fatal(timeError)
+        log.Fatal(timeError, "couldn't marshal time")
     }
     return bucketByTimeIndex.Delete(key)
 }
