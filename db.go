@@ -130,6 +130,14 @@ func ClearEvent(id string) {
     }
 }
 
+func CountBuckets() int {
+    count, error := bucketByTimeIndex.Count()
+    if error != nil {
+        log.Fatal(error)
+    }
+    return count
+}
+
 func ProbabilisticSleepDuration() time.Duration {
     return time.Millisecond * 100
 }
