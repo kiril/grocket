@@ -1,4 +1,4 @@
-package grocket
+package main
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 
 
 func StatusInfo(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(writer, "Grocket Server version %s", version)
+	fmt.Fprintf(writer, "Grocket Server version %s, %d buckets indexed", version, CountBuckets())
 }
 
 func ScheduleEvent(writer http.ResponseWriter, request *http.Request) {

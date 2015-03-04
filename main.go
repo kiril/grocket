@@ -1,4 +1,4 @@
-package grocket
+package main
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-var version = "0.0.1"
+var version = "0.0.2"
 
 func main() {
 	fmt.Printf("Grocket Server version %s\n", version);

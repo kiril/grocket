@@ -1,4 +1,4 @@
-package grocket
+package main
 
 import (
 	"time"
