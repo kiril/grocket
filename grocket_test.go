@@ -122,4 +122,12 @@ func TestStoreEvent(tests *testing.T) {
     if ! bucket.ContainsEvent(event) {
         tests.Fatal("Wait, where is my event then?", bucket)
     }
+
+    grocket.ClearEvent(event.Id)
+
+    bucket = grocket.FindBucketByTime(event.Due)
+
+    if bucket != nil {
+        tests.Fatal("shoit")
+    }
 }

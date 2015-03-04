@@ -100,6 +100,9 @@ func (bucket *TimeBucket) UnmarshalBinary(bytes []byte) error {
     return nil
 }
 
+func (bucket *TimeBucket) IsEmpty() bool {
+    return len(bucket.EventIds) == 0
+}
 
 func (bucket *TimeBucket) ContainsEvent(event *Event) bool {
     eventIdBytes := []byte(event.Id)

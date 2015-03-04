@@ -118,6 +118,18 @@ func RetrieveEventById(id string) *Event {
     return eventsById[id].Event
 }
 
+func ClearEvent(id string) {
+    indexed := eventsById[id]
+    if indexed != nil {
+        bucket := FindBucketByTime(indexed.Event.Due)
+        bucket.RemoveEvent(indexed.Event)
+        if bucket.IsEmpty() {
+            RemoveTimeBucket(bucket)
+        }
+        delete(eventsById, id)
+    }
+}
+
 func ProbabilisticSleepDuration() time.Duration {
     return time.Millisecond * 100
 }
