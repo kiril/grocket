@@ -8,6 +8,8 @@ import (
 )
 
 func TestTimeBucketMarshaling(tests *testing.T) {
+    main.CountBuckets()
+
     bucket := &main.TimeBucket{Time: time.Now(), EventIds: [][]byte{[]byte("111")}}
 
     bytes, error := bucket.MarshalBinary()
