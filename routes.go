@@ -15,13 +15,13 @@ type Route struct {
 type Routes []Route
 
 var routes = Routes{
-	Route{"Status",      "GET",  "/",                                  StatusInfo,},
+	Route{"Status",   "GET",  "/",                                  StatusInfo,},
 
-	Route{"Next",        "GET",  "/events/next",                       NextEvent,},
+	Route{"Next",     "GET",  "/events/next",                       NextEvent,},
 
-	Route{"Events",      "GET",  "/events/list/{startTime}-{endTime}", EventList,},
+	Route{"Events",   "GET",  "/events/list/{startTime}-{endTime}", EventList,},
 
-	Route{"Event",       "GET",  "/events/{eventId}",                  EventById,},
+	Route{"Event",    "GET",  "/events/{eventId}",                  EventById,},
 
-	Route{"Schedule",    "POST", "/events",                            ScheduleEvent,},
+	Route{"Schedule", "POST", "/events",                            ScheduleEvent,},
 }
