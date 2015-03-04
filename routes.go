@@ -17,11 +17,11 @@ type Routes []Route
 var routes = Routes{
 	Route{"Status",      "GET",  "/",                                  StatusInfo,},
 
-	Route{"Event",       "GET",  "/events/{eventId}",                  EventById,},
-
-	Route{"Next",        "GET",  "/events/{eventId}",                  NextEvent,},
+	Route{"Next",        "GET",  "/events/next",                       NextEvent,},
 
 	Route{"Events",      "GET",  "/events/list/{startTime}-{endTime}", EventList,},
+
+	Route{"Event",       "GET",  "/events/{eventId}",                  EventById,},
 
 	Route{"Schedule",    "POST", "/events",                            ScheduleEvent,},
 }
