@@ -17,15 +17,11 @@ type Routes []Route
 var routes = Routes{
 	Route{"Status",      "GET",  "/",                                  StatusInfo,},
 
-	Route{"Due",         "GET",  "/events/{eventId}/due",              EventDue,},
-	Route{"Expiry",      "GET",  "/events/{eventId}/expiry",           EventExpiry,},
-	Route{"Payload",     "GET",  "/events/{eventId}/payload",          EventPayload,},
-	Route{"Endpoint",    "GET",  "/events/{eventId}/endpoint",         EventEndpoint,},
-	Route{"MaxAttempts", "GET",  "/events/{eventId}/max-attempts",     EventMaxAttempts,},
-	Route{"Verb",        "GET",  "/events/{eventId}/verb",             EventVerb,},
-	Route{"Due",         "GET",  "/events/{eventId}",                  ViewEvent,},
+	Route{"Event",       "GET",  "/events/{eventId}",                  EventById,},
 
-	Route{"Events",      "POST", "/events",                            ScheduleEvent,},
+	Route{"Next",        "GET",  "/events/{eventId}",                  NextEvent,},
 
 	Route{"Events",      "GET",  "/events/list/{startTime}-{endTime}", EventList,},
+
+	Route{"Schedule",    "POST", "/events",                            ScheduleEvent,},
 }

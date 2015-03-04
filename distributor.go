@@ -1,6 +1,7 @@
 package main
 
 import "time"
+import core "github.com/kiril/grocket/core"
 
 func ProcessBacklog() {
     // this whole thing has to happen transactionally...
@@ -17,6 +18,6 @@ func ProcessBacklog() {
     // time.Sleep(ProbabilisticSleepDuration())
 }
 
-func Distribute(event *Event) {
+func Distribute(event *core.Event) {
 
 }

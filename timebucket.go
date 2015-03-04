@@ -6,6 +6,8 @@ import (
     "log"
     "reflect"
     "sort"
+
+    core "github.com/kiril/grocket/core"
 )
 
 
@@ -104,7 +106,7 @@ func (bucket *TimeBucket) IsEmpty() bool {
     return len(bucket.EventIds) == 0
 }
 
-func (bucket *TimeBucket) ContainsEvent(event *Event) bool {
+func (bucket *TimeBucket) ContainsEvent(event *core.Event) bool {
     eventIdBytes := []byte(event.Id)
     for i := 0; i < len(bucket.EventIds); i++ {
         if reflect.DeepEqual(bucket.EventIds[i], eventIdBytes) {
@@ -114,7 +116,7 @@ func (bucket *TimeBucket) ContainsEvent(event *Event) bool {
     return false
 }
 
-func (bucket *TimeBucket) RemoveEvent(event *Event) {
+func (bucket *TimeBucket) RemoveEvent(event *core.Event) {
     i := sort.Search(len(bucket.EventIds),
         func(i int) bool {return string(bucket.EventIds[i]) >= event.Id})
 
@@ -137,7 +139,7 @@ func (bucket *TimeBucket) RemoveEvent(event *Event) {
     }
 }
 
-func (bucket *TimeBucket) AddEvent(event *Event) {
+func (bucket *TimeBucket) AddEvent(event *core.Event) {
     i := sort.Search(len(bucket.EventIds),
         func(i int) bool {return string(bucket.EventIds[i]) >= event.Id})
 

@@ -2,6 +2,7 @@ package main_test
 
 import (
     "../grocket"
+    core "github.com/kiril/grocket/core"
     "testing"
     "time"
     "reflect"
@@ -59,7 +60,7 @@ func TestBucketRoundTrips(tests *testing.T) {
 }
 
 func TestBucketModifiers(tests *testing.T) {
-    event := &main.Event{
+    event := &core.Event{
         Id: "123",
         Due: time.Now(),
         Payload: "Holy Shit",
@@ -86,7 +87,7 @@ func TestBucketModifiers(tests *testing.T) {
         tests.Fatal("Holy shit why is it still there")
     }
 
-    event2 := &main.Event{
+    event2 := &core.Event{
         Id: "345",
         Due: time.Now(),
         Payload: "Holy Shit",
@@ -102,12 +103,17 @@ func TestBucketModifiers(tests *testing.T) {
 }
 
 func TestStoreEvent(tests *testing.T) {
-    event := &main.Event{
+    event := &core.Event{
         Id: "123",
         Due: time.Now(),
         Payload: "Holy Shit",
         Expiry: time.Now().Add(time.Second * 60),
         EndPoint: "http://gc.com/fooooo",
+    }
+
+    event2 := main.RetrieveEventById(event.Id)
+    if event2 != nil {
+        tests.Fatal("Oh snap what's up with the event being there?")
     }
 
     main.StoreEvent(event)

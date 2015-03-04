@@ -1,6 +1,7 @@
 package main
 
 import (
+    client "github.com/kiril/grocket/client"
     "os"
 	"fmt"
 	"log"
@@ -16,9 +17,6 @@ func StartServer(port int) {
 	router := NewRouter()
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), router))
-}
-
-func StartClient(port int) {
 }
 
 func main() {
@@ -47,6 +45,6 @@ func main() {
         if error != nil {
             log.Fatalf("Invalid server port: needs to be int, not %s", args[1])
         }
-        StartClient(port)
+        client.StartClient(port)
     }
 }

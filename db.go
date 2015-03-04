@@ -4,11 +4,12 @@ import (
     "time"
     "log"
 
-    "github.com/kiril/btree"
+    core "github.com/kiril/grocket/core"
+    btree "github.com/kiril/btree"
 )
 
 type IndexedEvent struct {
-    Event  *Event
+    Event  *core.Event
     Bucket *TimeBucket
 }
 
@@ -88,7 +89,7 @@ func (indexed IndexedEvent) AddToBucket() {
     indexed.Bucket.AddEvent(indexed.Event)
 }
 
-func StoreEvent(event *Event) {
+func StoreEvent(event *core.Event) {
     indexed := eventsById[event.Id]
     if indexed != nil {
         if ! indexed.Event.Due.Equal(event.Due) {
@@ -114,8 +115,13 @@ func StoreEvent(event *Event) {
     eventsById[event.Id] = indexed
 }
 
-func RetrieveEventById(id string) *Event {
-    return eventsById[id].Event
+func RetrieveEventById(id string) *core.Event {
+    indexed := eventsById[id]
+    if indexed == nil {
+        return nil
+    } else {
+        return indexed.Event
+    }
 }
 
 func ClearEvent(id string) {
